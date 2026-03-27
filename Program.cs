@@ -1,20 +1,34 @@
 ﻿using Balatro1;
 
-Console.WriteLine("--- Initializing Deck ---");
-Deck deck = new Deck();
-Console.WriteLine($"Deck created with {deck.RemainingCards} cards.");
-
-Console.WriteLine("\n--- Shuffling ---");
-deck.Shuffle();
-
-Console.WriteLine("\n--- Dealing 5 cards ---");
-for (int i = 0; i < 5; i++)
+namespace Balatro1
 {
-    var card = deck.Deal();
-    if (card != null)
+    class Program
     {
-        Console.WriteLine($"Dealt: {card}");
+        static void Main(string[] args)
+        {
+            Deck testDeck = new Deck();
+            testDeck.Shuffle();
+
+            // Create a hand that can hold 6 cards (5 from deck + 1 bonus)
+            PlayerHand hand = new PlayerHand(6);
+
+            // Deal 5 regular cards
+            for (int i = 0; i < 5; i++)
+            {
+                var card = testDeck.TakeCard();
+                if (card == null) break;
+                hand.AddCard(card);
+            }
+
+            // Manually add a BonusCard for debugging
+            hand.AddCard(new BonusCard(Suit.Hearts, CardValue.A));
+
+            Model model = new Model(testDeck, hand);
+            ViewModel viewModel = new ViewModel(model);
+            viewModel.UpdateFromModel();
+
+            // Run rendering logic directly from ViewModel
+            viewModel.Run();
+        }
     }
 }
-
-Console.WriteLine($"\nRemaining cards in deck: {deck.RemainingCards}");

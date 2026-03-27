@@ -1,10 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Balatro1
 {
-    internal class PlayerHand
+    public class PlayerHand
     {
+        public List<Card> Cards { get; } = new();
+        public int MaxCards { get; }
+
+        public PlayerHand(int maxCards) => MaxCards = maxCards;
+
+        public void AddCard(Card card)
+        {
+            if (Cards.Count < MaxCards) Cards.Add(card);
+        }
     }
 }

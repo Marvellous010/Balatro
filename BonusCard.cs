@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Balatro1
+﻿namespace Balatro1
 {
-    internal class BonusCard
+    public class BonusCard : Card
     {
+        public BonusCard(Suit suit, CardValue value) : base(suit, value) { }
+        public override int BonusPoints => 10;
+        public override string ToString() => $"[BONUS] {Value} of {Suit} (+10)";
     }
 }

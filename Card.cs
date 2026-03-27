@@ -4,6 +4,7 @@
     {
         public Suit Suit { get; }
         public CardValue Value { get; }
+        public virtual int BonusPoints => 0;
 
         public Card(Suit suit, CardValue value)
         {

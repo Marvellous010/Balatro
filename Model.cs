@@ -1,10 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Balatro1
+﻿namespace Balatro1
 {
-    internal class Model
+    public class Model
     {
+        public Deck Deck { get; }
+        public PlayerHand Hand { get; }
+
+        public Model(Deck deck, PlayerHand hand)
+        {
+            Deck = deck;
+            Hand = hand;
+        }
     }
 }
