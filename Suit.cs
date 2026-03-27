@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Balatro1
+﻿namespace Balatro1
 {
-    internal class Suit
+    public enum Suit
     {
+        Hearts,
+        Diamonds,
+        Clubs,
+        Spades
     }
 }

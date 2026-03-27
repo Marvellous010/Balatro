@@ -1,10 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Balatro1
+﻿namespace Balatro1
 {
-    internal class Card
+    public class Card
     {
+        public Suit Suit { get; }
+        public CardValue Value { get; }
+
+        public Card(Suit suit, CardValue value)
+        {
+            Suit = suit;
+            Value = value;
+        }
+
+        public override string ToString() => $"{Value} of {Suit}";
     }
 }
