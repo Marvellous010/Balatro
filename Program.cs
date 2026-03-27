@@ -9,7 +9,6 @@ namespace Balatro1
             Deck testDeck = new Deck();
             testDeck.Shuffle();
 
-            // Create a hand that can hold 6 cards (5 from deck + 1 bonus)
             PlayerHand hand = new PlayerHand(6);
 
             // Deal 5 regular cards
@@ -20,14 +19,20 @@ namespace Balatro1
                 hand.AddCard(card);
             }
 
-            // Manually add a BonusCard for debugging
+      
+            // Regular cards
+            hand.AddCard(new Card(Suit.Clubs, CardValue.Ten));
+            hand.AddCard(new Card(Suit.Diamonds, CardValue.Ten));
+
+            // Special cards
             hand.AddCard(new BonusCard(Suit.Hearts, CardValue.A));
+            hand.AddCard(new ExtraCard(Suit.Spades, CardValue.Ten)); // Should give +6 (3 Tens in hand * 2)
 
             Model model = new Model(testDeck, hand);
             ViewModel viewModel = new ViewModel(model);
             viewModel.UpdateFromModel();
 
-            // Run rendering logic directly from ViewModel
+           
             viewModel.Run();
         }
     }

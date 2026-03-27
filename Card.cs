@@ -1,16 +1,20 @@
-﻿namespace Balatro1
+﻿using System.Collections.Generic;
+
+namespace Balatro1
 {
     public class Card
     {
         public Suit Suit { get; }
         public CardValue Value { get; }
-        public virtual int BonusPoints => 0;
 
         public Card(Suit suit, CardValue value)
         {
             Suit = suit;
             Value = value;
         }
+
+        
+        public virtual int CalculateBonus(IEnumerable<Card> hand) => 0;
 
         public override string ToString() => $"{Value} of {Suit}";
     }
