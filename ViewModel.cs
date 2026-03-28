@@ -98,9 +98,16 @@ namespace Balatro1
 
         private bool CheckForFlush()
         {
+            // Je hebt minimaal 5 kaarten nodig voor een Flush
             if (CurrentHand.Count < 5) return false;
+
+            // Pak alle kaarten die GEEN WildCard zijn en groepeer ze op Suit
             var suitGroups = CurrentHand.Where(c => !c.IsWild).GroupBy(c => c.Suit);
+
+            // Tel hoeveel WildCards er zijn
             int wildCount = CurrentHand.Count(c => c.IsWild);
+
+            // Check of een van de groepen + wildcards >= 5 is
             return suitGroups.Any(g => g.Count() + wildCount >= 5);
         }
     }
