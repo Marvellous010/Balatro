@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Balatro1
+﻿namespace Balatro1
 {
-    internal class WildCard
+    public class WildCard : Card
     {
+        public WildCard(Suit suit, CardValue value) : base(suit, value) { }
+
+        public override bool IsWild => true;
+
+        public override string ToString() => $"[WILD] {Value} of {Suit}";
     }
 }

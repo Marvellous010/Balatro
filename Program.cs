@@ -6,27 +6,15 @@ namespace Balatro1
     {
         static void Main(string[] args)
         {
-            Deck testDeck = new Deck();
-            testDeck.Shuffle();
+            // Initialisatie van de Model-laag
+            Deck deck = new Deck();
+            PlayerHand hand = new PlayerHand(8); // Standaard handgrootte van 8
 
-            PlayerHand hand = new PlayerHand(10);
-            for (int i = 0; i < 5; i++)
-            {
-                var card = testDeck.TakeCard();
-                if (card != null) hand.AddCard(card);
-            }
+            Model model = new Model(deck, hand);
 
-           
-            hand.AddCard(new Card(Suit.Clubs, CardValue.Ten));
-            hand.AddCard(new Card(Suit.Diamonds, CardValue.Ten));
-            hand.AddCard(new BonusCard(Suit.Hearts, CardValue.A));
-            hand.AddCard(new ExtraCard(Suit.Spades, CardValue.Ten));
-            hand.AddCard(new GlassCard(Suit.Diamonds, CardValue.Eight));
-
-            Model model = new Model(testDeck, hand);
-            ViewModel viewModel = new ViewModel(model);
-            viewModel.UpdateFromModel();
-            viewModel.Run();
+            // Start de ViewModel (Game Loop)
+            ViewModel game = new ViewModel(model);
+            game.Run();
         }
     }
 }
