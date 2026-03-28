@@ -15,6 +15,9 @@ namespace Balatro1
 
         public virtual int CalculateBonus(IEnumerable<Card> hand) => 0;
 
+        // Default multiplier is 1.0x
+        public virtual double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
+
         public override string ToString() => $"{Value} of {Suit}";
     }
 }
