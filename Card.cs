@@ -13,7 +13,6 @@ namespace Balatro1
             Value = value;
         }
 
-        
         public virtual int CalculateBonus(IEnumerable<Card> hand) => 0;
 
         public override string ToString() => $"{Value} of {Suit}";

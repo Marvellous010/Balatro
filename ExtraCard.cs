@@ -9,7 +9,7 @@ namespace Balatro1
 
         public override int CalculateBonus(IEnumerable<Card> hand)
         {
-            // Counts how many cards in the hand have the same value (including itself)
+            // +2 points for every card with the same rank in hand
             int count = hand.Count(c => c.Value == this.Value);
             return count * 2;
         }

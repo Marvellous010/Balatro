@@ -9,7 +9,7 @@ namespace Balatro1
             Deck testDeck = new Deck();
             testDeck.Shuffle();
 
-            PlayerHand hand = new PlayerHand(6);
+            PlayerHand hand = new PlayerHand(8);
 
             // Deal 5 regular cards
             for (int i = 0; i < 5; i++)

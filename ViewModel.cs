@@ -8,33 +8,23 @@ namespace Balatro1
         private Model _model;
         public List<Card> CurrentHand { get; private set; } = new();
 
-        public ViewModel(Model model)
-        {
-            _model = model;
-        }
+        public ViewModel(Model model) => _model = model;
 
-        public void UpdateFromModel()
-        {
-            CurrentHand = new List<Card>(_model.Hand.Cards);
-        }
+        public void UpdateFromModel() => CurrentHand = new List<Card>(_model.Hand.Cards);
 
         public void Run()
         {
             Console.WriteLine("--- Balatro Debug View ---");
-            Console.WriteLine($"Cards in hand: {CurrentHand.Count}");
-
             int totalChips = 0;
             int totalBonus = 0;
 
             foreach (var card in CurrentHand)
             {
-                // Basic Balatro scoring (2-10 = value, Face/Ace = 10 or 11)
                 int chips = (int)card.Value;
                 if (chips > 10) chips = 10;
                 if (card.Value == CardValue.A) chips = 11;
 
                 int bonus = card.CalculateBonus(CurrentHand);
-
                 totalChips += chips;
                 totalBonus += bonus;
 
@@ -42,8 +32,8 @@ namespace Balatro1
             }
 
             Console.WriteLine("---------------------------------------------------------");
-            Console.WriteLine($"Total: ({totalChips} Chips + {totalBonus} Bonus) = {totalChips + totalBonus} points");
-            Console.WriteLine("\nDebug finished. Press any key to exit...");
+            Console.WriteLine($"Total Score: {totalChips + totalBonus} ({totalChips} Chips + {totalBonus} Bonus)");
+            Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
         }
     }
