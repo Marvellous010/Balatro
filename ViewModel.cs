@@ -7,108 +7,154 @@ namespace Balatro1
     public class ViewModel
     {
         private Model _model;
-        public List<Card> CurrentHand { get; private set; } = new();
+        private List<Card> _selectedCards = new();
+        private double _totalScore = 0;
+        private readonly ICombination _flush = new FlushCombination(); 
+
+        public List<Card> CurrentHand => _model.Hand.Cards;
 
         public ViewModel(Model model) => _model = model;
 
-        public void UpdateFromModel() => CurrentHand = new List<Card>(_model.Hand.Cards);
-
         public void Run()
         {
+            ResetGame();
             bool playing = true;
-            DealNewHand();
 
             while (playing)
             {
                 Console.Clear();
-                UpdateFromModel();
-
-                Console.WriteLine("=== BALATRO GAME LOOP ===");
-                Console.WriteLine($"Kaarten over in deck: {_model.Deck.RemainingCards}");
+                Console.WriteLine("=== BALATRO INTERACTIEF ===");
+                Console.WriteLine($"Totaal behaalde score: {_totalScore}");
+                Console.WriteLine($"Deck: {_model.Deck.RemainingCards} | Geselecteerd: {_selectedCards.Count}/5");
                 Console.WriteLine("---------------------------------------------------------");
 
-                int baseChips = 0;
-                double totalMulti = 1.0;
-
-                foreach (var card in CurrentHand)
+                for (int i = 0; i < CurrentHand.Count; i++)
                 {
-                    int chips = (int)card.Value;
-                    if (chips > 10) chips = 10;
-                    if (card.Value == CardValue.A) chips = 11;
-
-                    baseChips += chips + card.CalculateBonus(CurrentHand);
-                    totalMulti *= card.CalculateMultiplier(CurrentHand);
-
-                    string specialInfo = card.IsWild ? " [WILD]" : "";
-                    Console.WriteLine($"- {card,-30}{specialInfo} | Multi: {card.CalculateMultiplier(CurrentHand)}x");
-                }
-
-                if (CheckForFlush())
-                {
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("\n>>> FLUSH GEDETECTEERD! (+35 Chips, 4x Mult) <<<");
-                    Console.ResetColor();
-                    baseChips += 35;
-                    totalMulti *= 4;
+                    string prefix = _selectedCards.Contains(CurrentHand[i]) ? "[X]" : "[ ]";
+                    Console.WriteLine($"{prefix} {i + 1}: {CurrentHand[i]}");
                 }
 
                 Console.WriteLine("---------------------------------------------------------");
-                Console.WriteLine($"Hand Score: {baseChips * totalMulti} ({baseChips} Chips * {totalMulti}x Multi)");
-                Console.WriteLine("---------------------------------------------------------");
 
-                Console.WriteLine("\n[S]peel Hand (Check Breuk) | [N]ieuwe Hand | [Q]uit");
+                if (_selectedCards.Count > 0) ShowLiveScore();
+                else Console.WriteLine("Selecteer kaarten om een score te zien...");
+
+                Console.WriteLine("\n[1-8] Selecteer | [P]eel hand | [D]iscard | [R]eset | [Q]uit");
                 string input = Console.ReadLine()?.ToUpper();
 
-                if (input == "S")
-                {
-                    CheckGlassBreaking();
-                    Console.WriteLine("\nDruk op een toets om door te gaan...");
-                    Console.ReadKey();
-                }
-                else if (input == "N") DealNewHand();
+                if (int.TryParse(input, out int index) && index >= 1 && index <= CurrentHand.Count)
+                    ToggleSelection(CurrentHand[index - 1]);
+                else if (input == "P") PlayHand();
+                else if (input == "D") DiscardCards();
+                else if (input == "R") ResetGame();
                 else if (input == "Q") playing = false;
             }
         }
 
-        private void DealNewHand()
+        private void ShowLiveScore()
         {
-            _model.Deck.Reset();
-            _model.Deck.Shuffle();
-            _model.Hand.Cards.Clear();
-            for (int i = 0; i < _model.Hand.MaxCards; i++)
-            {
-                var card = _model.Deck.TakeCard();
-                if (card != null) _model.Hand.AddCard(card);
-            }
-        }
+            int chips = 0;
+            double multi = 1.0;
 
-        private void CheckGlassBreaking()
-        {
-            foreach (var card in CurrentHand.ToArray())
+            // 1. Check voor Flush via de class
+            if (_flush.IsMatch(_selectedCards))
             {
-                if (card is GlassCard glass && glass.ShouldBreak())
+                chips += _flush.BaseChips;
+                multi = _flush.BaseMultiplier;
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"Combo: {_flush.Name} (+{_flush.BaseChips} Chips, {_flush.BaseMultiplier}x Multi)");
+                Console.ResetColor();
+            }
+
+            // 2. Bereken score van GESPEELDE kaarten
+            foreach (var card in _selectedCards)
+            {
+                int val = Math.Min((int)card.Value, 10);
+                if (card.Value == CardValue.A) val = 11;
+                chips += val + card.CalculateBonus(_selectedCards);
+                multi *= card.CalculateMultiplier(_selectedCards);
+            }
+
+            // 3. PASSIEVE SCORE: SteelCards die in de hand blijven (niet geselecteerd)
+            var cardsInHand = CurrentHand.Except(_selectedCards);
+            foreach (var card in cardsInHand)
+            {
+                if (card is SteelCard steel)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"\n!!! {card} IS GEBROKEN en uit het spel verwijderd!");
-                    Console.ResetColor();
-                    _model.Hand.Cards.Remove(card);
+                    multi *= steel.PassiveMultiplier;
+                    Console.WriteLine($"Passive Bonus: {steel.Value} of {steel.Suit} (x{steel.PassiveMultiplier})");
                 }
             }
+
+            Console.WriteLine($">>> POTENTIËLE SCORE: {chips * multi} <<<");
         }
 
-        private bool CheckForFlush()
+        private void ToggleSelection(Card card)
         {
-            // Je hebt minimaal 5 kaarten nodig voor een Flush
-            if (CurrentHand.Count < 5) return false;
+            if (_selectedCards.Contains(card)) _selectedCards.Remove(card);
+            else if (_selectedCards.Count < 5) _selectedCards.Add(card);
+        }
 
-            // Pak alle kaarten die GEEN WildCard zijn en groepeer ze op Suit
-            var suitGroups = CurrentHand.Where(c => !c.IsWild).GroupBy(c => c.Suit);
+        private void PlayHand()
+        {
+            if (_selectedCards.Count == 0) return;
 
-            // Tel hoeveel WildCards er zijn
-            int wildCount = CurrentHand.Count(c => c.IsWild);
+            // Definitieve score berekenen (zelfde logica als ShowLiveScore)
+            int chips = 0;
+            double multi = 1.0;
+            if (_flush.IsMatch(_selectedCards)) { chips += _flush.BaseChips; multi = _flush.BaseMultiplier; }
 
-            // Check of een van de groepen + wildcards >= 5 is
-            return suitGroups.Any(g => g.Count() + wildCount >= 5);
+            foreach (var card in _selectedCards)
+            {
+                int val = Math.Min((int)card.Value, 10);
+                if (card.Value == CardValue.A) val = 11;
+                chips += val + card.CalculateBonus(_selectedCards);
+                multi *= card.CalculateMultiplier(_selectedCards);
+            }
+
+            // Passive SteelCards
+            var cardsInHand = CurrentHand.Except(_selectedCards);
+            foreach (var card in cardsInHand)
+                if (card is SteelCard steel) multi *= steel.PassiveMultiplier;
+
+            double handScore = chips * multi;
+            _totalScore += handScore;
+
+            // Verwijder kaarten en check glas
+            foreach (var card in _selectedCards.ToArray())
+            {
+                if (card is GlassCard g && g.ShouldBreak()) Console.WriteLine($"!!! {card} GEBROKEN !!!");
+                _model.Hand.Cards.Remove(card);
+            }
+
+            _selectedCards.Clear();
+            FillHand();
+            Console.WriteLine($"\nHand gespeeld! +{handScore} punten. Druk op een toets...");
+            Console.ReadKey();
+        }
+
+        private void DiscardCards()
+        {
+            foreach (var card in _selectedCards) _model.Hand.Cards.Remove(card);
+            _selectedCards.Clear();
+            FillHand();
+        }
+
+        private void ResetGame()
+        {
+            _model.Deck.Reset(); _model.Deck.Shuffle();
+            _model.Hand.Cards.Clear(); _selectedCards.Clear();
+            _totalScore = 0; FillHand();
+        }
+
+        private void FillHand()
+        {
+            while (_model.Hand.Cards.Count < _model.Hand.MaxCards)
+            {
+                var c = _model.Deck.TakeCard();
+                if (c == null) break;
+                _model.Hand.AddCard(c);
+            }
         }
     }
 }

@@ -9,13 +9,10 @@ namespace Balatro1
 
         public GlassCard(Suit suit, CardValue value) : base(suit, value) { }
 
+        public override int CalculateBonus(IEnumerable<Card> hand) => 0;
         public override double CalculateMultiplier(IEnumerable<Card> hand) => 2.0;
 
-        public bool ShouldBreak()
-        {
-            // 1 in 4 chance to break (25%)
-            return _random.Next(1, 5) == 1;
-        }
+        public bool ShouldBreak() => _random.Next(1, 5) == 1;
 
         public override string ToString() => $"[GLASS] {Value} of {Suit} (2x Multi)";
     }

@@ -4,14 +4,15 @@ using System.Linq;
 
 namespace Balatro1
 {
+
     public class Deck
     {
         private List<Card> _cards = new();
         private readonly Random _random = new();
 
-        public Deck() => Reset(); // Hersteld
+        public Deck() => Reset(); // DIT MOET TERUG
 
-        public int RemainingCards => _cards.Count; // Hersteld
+        public int RemainingCards => _cards.Count;
 
         public void Reset()
         // ...
@@ -21,6 +22,7 @@ namespace Balatro1
             {
                 foreach (CardValue val in Enum.GetValues(typeof(CardValue)))
                 {
+
              
                     // Define specific unique special cards in the deck
                     if (suit == Suit.Hearts && val == CardValue.A)
@@ -31,6 +33,10 @@ namespace Balatro1
                         _cards.Add(new GlassCard(suit, val));
                     else if (suit == Suit.Clubs && val == CardValue.J)
                         _cards.Add(new WildCard(suit, val));
+               
+                    else if (suit == Suit.Spades && val == CardValue.K)
+                        _cards.Add(new SteelCard(suit, val)); 
+           
                     else
                         _cards.Add(new Card(suit, val));
                 }

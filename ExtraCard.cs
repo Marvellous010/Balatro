@@ -9,10 +9,11 @@ namespace Balatro1
 
         public override int CalculateBonus(IEnumerable<Card> hand)
         {
-            // +2 points for every card with the same rank in hand
             int count = hand.Count(c => c.Value == this.Value);
             return count * 2;
         }
+
+        public override double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
 
         public override string ToString() => $"[EXTRA] {Value} of {Suit} (+2 per same rank)";
     }
