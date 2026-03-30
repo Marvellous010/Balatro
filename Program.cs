@@ -1,4 +1,6 @@
-﻿using Balatro1;
+﻿using System;
+using System.Text;
+using Balatro1;
 
 namespace Balatro1
 {
@@ -6,15 +8,11 @@ namespace Balatro1
     {
         static void Main(string[] args)
         {
-            // Initialisatie van de Model-laag
-            Deck deck = new Deck();
-            PlayerHand hand = new PlayerHand(8); // Standaard handgrootte van 8
+            
+            Console.OutputEncoding = Encoding.UTF8;
 
-            Model model = new Model(deck, hand);
-
-            // Start de ViewModel (Game Loop)
-            ViewModel game = new ViewModel(model);
-            game.Run();
+            Model model = new Model(new Deck(), new PlayerHand(8));
+            new ViewModel(model).Run();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Balatro1
         private Model _model;
         private List<Card> _selectedCards = new();
         private double _totalScore = 0;
-        private readonly ICombination _flush = new FlushCombination(); 
+        private readonly ICombination _flush = new FlushCombination();
 
         public List<Card> CurrentHand => _model.Hand.Cards;
 
@@ -23,11 +23,12 @@ namespace Balatro1
             while (playing)
             {
                 Console.Clear();
-                Console.WriteLine("=== BALATRO INTERACTIEF ===");
-                Console.WriteLine($"Totaal behaalde score: {_totalScore}");
-                Console.WriteLine($"Deck: {_model.Deck.RemainingCards} | Geselecteerd: {_selectedCards.Count}/5");
+                Console.WriteLine("Balatro C# Spel");
+                Console.WriteLine($"Totaal Score: {_totalScore}");
+                Console.WriteLine($"Deck: {_model.Deck.RemainingCards} | Hand: {CurrentHand.Count}");
                 Console.WriteLine("---------------------------------------------------------");
 
+                // Weer gewoon onder elkaar (verticaal)
                 for (int i = 0; i < CurrentHand.Count; i++)
                 {
                     string prefix = _selectedCards.Contains(CurrentHand[i]) ? "[X]" : "[ ]";
@@ -37,17 +38,21 @@ namespace Balatro1
                 Console.WriteLine("---------------------------------------------------------");
 
                 if (_selectedCards.Count > 0) ShowLiveScore();
-                else Console.WriteLine("Selecteer kaarten om een score te zien...");
+                else Console.WriteLine("Selecteer een kaart");
 
-                Console.WriteLine("\n[1-8] Selecteer | [P]eel hand | [D]iscard | [R]eset | [Q]uit");
+                Console.WriteLine("\n[1-8] Kies | S[P]eel | [D]iscard | [R]eset | [Q]uit");
                 string input = Console.ReadLine()?.ToUpper();
 
-                if (int.TryParse(input, out int index) && index >= 1 && index <= CurrentHand.Count)
-                    ToggleSelection(CurrentHand[index - 1]);
+                if (string.IsNullOrWhiteSpace(input)) continue;
+
+                if (input == "Q") playing = false;
                 else if (input == "P") PlayHand();
                 else if (input == "D") DiscardCards();
                 else if (input == "R") ResetGame();
-                else if (input == "Q") playing = false;
+                else if (int.TryParse(input, out int index) && index >= 1 && index <= CurrentHand.Count)
+                {
+                    ToggleSelection(CurrentHand[index - 1]);
+                }
             }
         }
 
@@ -56,17 +61,13 @@ namespace Balatro1
             int chips = 0;
             double multi = 1.0;
 
-            // 1. Check voor Flush via de class
             if (_flush.IsMatch(_selectedCards))
             {
                 chips += _flush.BaseChips;
                 multi = _flush.BaseMultiplier;
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"Combo: {_flush.Name} (+{_flush.BaseChips} Chips, {_flush.BaseMultiplier}x Multi)");
-                Console.ResetColor();
+                Console.WriteLine($"Combo: {_flush.Name} (+{_flush.BaseChips}, x{_flush.BaseMultiplier})");
             }
 
-            // 2. Bereken score van GESPEELDE kaarten
             foreach (var card in _selectedCards)
             {
                 int val = Math.Min((int)card.Value, 10);
@@ -75,18 +76,11 @@ namespace Balatro1
                 multi *= card.CalculateMultiplier(_selectedCards);
             }
 
-            // 3. PASSIEVE SCORE: SteelCards die in de hand blijven (niet geselecteerd)
-            var cardsInHand = CurrentHand.Except(_selectedCards);
-            foreach (var card in cardsInHand)
-            {
-                if (card is SteelCard steel)
-                {
-                    multi *= steel.PassiveMultiplier;
-                    Console.WriteLine($"Passive Bonus: {steel.Value} of {steel.Suit} (x{steel.PassiveMultiplier})");
-                }
-            }
+            // SteelCard bonus
+            foreach (var card in CurrentHand.Except(_selectedCards))
+                if (card is SteelCard s) multi *= s.PassiveMultiplier;
 
-            Console.WriteLine($">>> POTENTIËLE SCORE: {chips * multi} <<<");
+            Console.WriteLine($"Aantal score: {chips * multi} <<<");
         }
 
         private void ToggleSelection(Card card)
@@ -99,7 +93,6 @@ namespace Balatro1
         {
             if (_selectedCards.Count == 0) return;
 
-            // Definitieve score berekenen (zelfde logica als ShowLiveScore)
             int chips = 0;
             double multi = 1.0;
             if (_flush.IsMatch(_selectedCards)) { chips += _flush.BaseChips; multi = _flush.BaseMultiplier; }
@@ -112,24 +105,20 @@ namespace Balatro1
                 multi *= card.CalculateMultiplier(_selectedCards);
             }
 
-            // Passive SteelCards
-            var cardsInHand = CurrentHand.Except(_selectedCards);
-            foreach (var card in cardsInHand)
-                if (card is SteelCard steel) multi *= steel.PassiveMultiplier;
+            foreach (var card in CurrentHand.Except(_selectedCards))
+                if (card is SteelCard s) multi *= s.PassiveMultiplier;
 
-            double handScore = chips * multi;
-            _totalScore += handScore;
+            _totalScore += (chips * multi);
 
-            // Verwijder kaarten en check glas
             foreach (var card in _selectedCards.ToArray())
             {
-                if (card is GlassCard g && g.ShouldBreak()) Console.WriteLine($"!!! {card} GEBROKEN !!!");
+                if (card is GlassCard g && g.ShouldBreak()) Console.WriteLine($" {card} is helaas gebroken");
                 _model.Hand.Cards.Remove(card);
             }
 
             _selectedCards.Clear();
             FillHand();
-            Console.WriteLine($"\nHand gespeeld! +{handScore} punten. Druk op een toets...");
+            Console.WriteLine("Hand gespeeld");
             Console.ReadKey();
         }
 
@@ -149,7 +138,7 @@ namespace Balatro1
 
         private void FillHand()
         {
-            while (_model.Hand.Cards.Count < _model.Hand.MaxCards)
+            while (CurrentHand.Count < _model.Hand.MaxCards)
             {
                 var c = _model.Deck.TakeCard();
                 if (c == null) break;
