@@ -13,7 +13,5 @@ namespace Balatro1
         public override double CalculateMultiplier(IEnumerable<Card> hand) => 2.0;
 
         public bool ShouldBreak() => _random.Next(1, 5) == 1;
-
-        public override string ToString() => $"[G] {Value} of {Suit} (2x Multi)";
     }
 }

@@ -8,7 +8,5 @@ namespace Balatro1
 
         public override int CalculateBonus(IEnumerable<Card> hand) => 10;
         public override double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
-
-        public override string ToString() => $"[B] {Value} of {Suit} (+10)";
     }
 }

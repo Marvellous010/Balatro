@@ -20,7 +20,5 @@ namespace Balatro1
         public override double CalculateMultiplier(IEnumerable<Card> hand)
             => _card.CalculateMultiplier(hand);
 
-        public override string ToString()
-            => $"{_card} [+{_extraPoints} sticker]";
     }
 }

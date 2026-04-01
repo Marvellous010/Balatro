@@ -6,13 +6,9 @@ namespace Balatro1
     {
         public SteelCard(Suit suit, CardValue value) : base(suit, value) { }
 
-        
         public override int CalculateBonus(IEnumerable<Card> hand) => 0;
         public override double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
 
-        
         public double PassiveMultiplier => 1.5;
-
-        public override string ToString() => $"[S] {Value} of {Suit} (1.5x in hand)";
     }
 }
