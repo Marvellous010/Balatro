@@ -11,7 +11,14 @@ namespace Balatro1
 
         public bool IsMatch(IEnumerable<Card> hand)
         {
-            return hand.GroupBy(c => c.Value).Any(g => g.Count() >= 2);
+            int wildCount = hand.Count(c => c.IsWild);
+            var groups = hand.Where(c => !c.IsWild).GroupBy(c => c.Value);
+
+            if (groups.Any(g => g.Count() >= 2)) return true;
+            if (wildCount >= 1 && hand.Count(c => !c.IsWild) >= 1) return true;
+            if (wildCount >= 2) return true;
+
+            return false;
         }
     }
 }
