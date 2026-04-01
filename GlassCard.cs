@@ -14,6 +14,6 @@ namespace Balatro1
 
         public bool ShouldBreak() => _random.Next(1, 5) == 1;
 
-        public override string ToString() => $"[GLASS] {Value} of {Suit} (2x Multi)";
+        public override string ToString() => $"[G] {Value} of {Suit} (2x Multi)";
     }
 }

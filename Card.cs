@@ -2,20 +2,18 @@
 
 namespace Balatro1
 {
-    public class Card
+    public class Card : ICard
     {
         public Suit Suit { get; }
         public CardValue Value { get; }
         public virtual bool IsWild => false;
 
-        
         public Card(Suit suit, CardValue value)
         {
             Suit = suit;
             Value = value;
         }
 
-        
         public virtual int CalculateBonus(IEnumerable<Card> hand) => 0;
         public virtual double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
 
@@ -41,10 +39,9 @@ namespace Balatro1
                 CardValue.Eight => "8",
                 CardValue.Nine => "9",
                 CardValue.Ten => "10",
-                _ => Value.ToString() 
+                _ => Value.ToString()
             };
 
-           
             string type = this.GetType().Name switch
             {
                 "BonusCard" => " (B)",

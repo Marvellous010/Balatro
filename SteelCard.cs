@@ -13,6 +13,6 @@ namespace Balatro1
         
         public double PassiveMultiplier => 1.5;
 
-        public override string ToString() => $"[STEEL] {Value} of {Suit} (1.5x in hand)";
+        public override string ToString() => $"[S] {Value} of {Suit} (1.5x in hand)";
     }
 }

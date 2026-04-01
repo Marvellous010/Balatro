@@ -15,6 +15,6 @@ namespace Balatro1
 
         public override double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
 
-        public override string ToString() => $"[EXTRA] {Value} of {Suit} (+2 per same rank)";
+        public override string ToString() => $"[E] {Value} of {Suit} (+2 per same rank)";
     }
 }
