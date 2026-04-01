@@ -10,12 +10,12 @@ namespace Balatro1
         private List<Card> _cards = new();
         private readonly Random _random = new();
 
-        public Deck() => Reset(); // DIT MOET TERUG
+        public Deck() => Reset(); 
 
         public int RemainingCards => _cards.Count;
 
         public void Reset()
-        // ...
+       
         {
             _cards.Clear();
             foreach (Suit suit in Enum.GetValues(typeof(Suit)))
@@ -24,7 +24,7 @@ namespace Balatro1
                 {
 
              
-                    // Define specific unique special cards in the deck
+                    
                     if (suit == Suit.Hearts && val == CardValue.A)
                         _cards.Add(new BonusCard(suit, val));
                     else if (suit == Suit.Spades && val == CardValue.Ten)

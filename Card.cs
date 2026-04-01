@@ -8,14 +8,14 @@ namespace Balatro1
         public CardValue Value { get; }
         public virtual bool IsWild => false;
 
-        // Constructor moet public zijn om direct kaarten te kunnen maken
+        
         public Card(Suit suit, CardValue value)
         {
             Suit = suit;
             Value = value;
         }
 
-        // Gebruik 'virtual' in plaats van 'abstract' zodat subklassen het kunnen aanpassen
+        
         public virtual int CalculateBonus(IEnumerable<Card> hand) => 0;
         public virtual double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
 
@@ -41,10 +41,10 @@ namespace Balatro1
                 CardValue.Eight => "8",
                 CardValue.Nine => "9",
                 CardValue.Ten => "10",
-                _ => Value.ToString() // J, Q, K, A
+                _ => Value.ToString() 
             };
 
-            // Dit kijkt welk type kaart het is voor het labeltje
+           
             string type = this.GetType().Name switch
             {
                 "BonusCard" => " (B)",
