@@ -1,44 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Balatro1
 {
     public class ViewModel
     {
-        private Model _model;
-        private List<Card> _selectedCards = new();
-        private double _totalScore = 0;
-        private readonly ICombination _flush = new FlushCombination();
-        private readonly ICombination _pair = new PairCombination();
+        private GameEngine _engine;
 
-        public List<Card> CurrentHand => _model.Hand.Cards;
-
-        public ViewModel(Model model) => _model = model;
+        public ViewModel(Model model)
+        {
+            _engine = new GameEngine(model);
+        }
 
         public void Run()
         {
-            ResetGame();
+            _engine.Reset();
             bool playing = true;
 
             while (playing)
             {
                 Console.Clear();
                 Console.WriteLine("Balatro C# Spel");
-                Console.WriteLine($"Score: {_totalScore}");
-                Console.WriteLine($"Deck: {_model.Deck.RemainingCards} | Hand: {CurrentHand.Count}");
+                Console.WriteLine($"Score: {_engine.TotalScore}");
+                Console.WriteLine($"Deck: {_engine.RemainingCards} | Hand: {_engine.CurrentHand.Count}");
                 Console.WriteLine("-----------------------------------");
 
-                for (int i = 0; i < CurrentHand.Count; i++)
+                for (int i = 0; i < _engine.CurrentHand.Count; i++)
                 {
-                    string check = _selectedCards.Contains(CurrentHand[i]) ? "[X]" : "[ ]";
-                    Console.WriteLine($"{check} {i + 1}: {CurrentHand[i]}");
+                    string check = _engine.SelectedCards.Contains(_engine.CurrentHand[i]) ? "[X]" : "[ ]";
+                    Console.Write($"{check} {i + 1}: ");
+                    PrintCardWithColor(_engine.CurrentHand[i]);
+                    Console.WriteLine();
                 }
 
                 Console.WriteLine("-----------------------------------");
 
-                if (_selectedCards.Count > 0) ShowScore();
-                else Console.WriteLine("Kies een kaart");
+                if (_engine.SelectedCards.Count > 0)
+                    ShowScore();
+                else
+                    Console.WriteLine("Kies een kaart");
 
                 Console.WriteLine("\n[1-8] Kies | [S]peel | [D]iscard | [R]eset | [Q]uit");
                 string input = Console.ReadLine()?.ToUpper();
@@ -46,107 +45,62 @@ namespace Balatro1
                 if (string.IsNullOrWhiteSpace(input)) continue;
 
                 if (input == "Q") playing = false;
-                else if (input == "S") PlayHand();
-                else if (input == "D") DiscardCards();
-                else if (input == "R") ResetGame();
-                else if (int.TryParse(input, out int nr) && nr >= 1 && nr <= CurrentHand.Count)
-                    ToggleSelection(CurrentHand[nr - 1]);
+                else if (input == "S") { _engine.PlayHand(); Console.WriteLine("Gespeeld!"); Console.ReadKey(); }
+                else if (input == "D") _engine.DiscardCards();
+                else if (input == "R") _engine.Reset();
+                else if (int.TryParse(input, out int nr) && nr >= 1 && nr <= _engine.CurrentHand.Count)
+                    _engine.ToggleSelection(_engine.CurrentHand[nr - 1]);
             }
         }
 
-        private (int, double) CalculateScore()
+        private void PrintCardWithColor(Card card)
         {
-            int chips = 0;
-            double multi = 1.0;
+            string typePrefix = card.GetTypePrefix();
+            string valueStr = card.GetValueString();
+            string suitSymbol = card.GetSuitSymbol();
 
-            if (_flush.IsMatch(_selectedCards))
+            if (!string.IsNullOrEmpty(typePrefix))
             {
-                chips += _flush.BaseChips;
-                multi = _flush.BaseMultiplier;
+                ConsoleColor typeColor = card.GetType().Name switch
+                {
+                    "BonusCard" => ConsoleColor.Yellow,
+                    "ExtraCard" => ConsoleColor.Cyan,
+                    "GlassCard" => ConsoleColor.Magenta,
+                    "WildCard" => ConsoleColor.DarkYellow,
+                    "SteelCard" => ConsoleColor.Gray,
+                    _ => ConsoleColor.White
+                };
+
+                Console.ForegroundColor = typeColor;
+                Console.Write(typePrefix);
+                Console.ResetColor();
             }
-            else if (_pair.IsMatch(_selectedCards))
+
+            Console.Write(valueStr);
+
+            ConsoleColor suitColor = card.Suit switch
             {
-                chips += _pair.BaseChips;
-                multi = _pair.BaseMultiplier;
-            }
+                Suit.Hearts => ConsoleColor.Red,
+                Suit.Diamonds => ConsoleColor.Black,
+                Suit.Spades => ConsoleColor.Red,
+                Suit.Clubs => ConsoleColor.Black,
+                _ => ConsoleColor.White
+            };
 
-            foreach (var card in _selectedCards)
-            {
-                int val = Math.Min((int)card.Value, 10);
-                if (card.Value == CardValue.A) val = 11;
-                chips += val + card.CalculateBonus(_selectedCards);
-                multi *= card.CalculateMultiplier(_selectedCards);
-            }
-
-            foreach (var card in CurrentHand.Except(_selectedCards))
-                if (card is SteelCard s) multi *= s.PassiveMultiplier;
-
-            return (chips, multi);
+            Console.ForegroundColor = suitColor;
+            Console.Write(suitSymbol);
+            Console.ResetColor();
         }
 
         private void ShowScore()
         {
-            var (chips, multi) = CalculateScore();
+            var (chips, multi) = _engine.GetCurrentScore();
+            var combo = _engine.GetCurrentCombination();
 
-            if (_flush.IsMatch(_selectedCards))
-                Console.WriteLine($"Combo: {_flush.Name} (+{_flush.BaseChips}, x{_flush.BaseMultiplier})");
-            else if (_pair.IsMatch(_selectedCards))
-                Console.WriteLine($"Combo: {_pair.Name} (+{_pair.BaseChips}, x{_pair.BaseMultiplier})");
+            if (combo != null)
+                Console.WriteLine($"Combo: {combo.Name} (+{combo.BaseChips}, x{combo.BaseMultiplier})");
 
             Console.WriteLine($"Score: {chips * multi}");
-        }
-
-        private void ToggleSelection(Card card)
-        {
-            if (_selectedCards.Contains(card)) _selectedCards.Remove(card);
-            else if (_selectedCards.Count < 5) _selectedCards.Add(card);
-        }
-
-        private void PlayHand()
-        {
-            if (_selectedCards.Count == 0) return;
-
-            var (chips, multi) = CalculateScore();
-            _totalScore += chips * multi;
-
-            foreach (var card in _selectedCards.ToArray())
-            {
-                if (card is GlassCard g && g.ShouldBreak())
-                    Console.WriteLine($"{card} is gebroken!");
-                _model.Hand.Cards.Remove(card);
-            }
-
-            _selectedCards.Clear();
-            FillHand();
-            Console.WriteLine("Gespeeld!");
-            Console.ReadKey();
-        }
-
-        private void DiscardCards()
-        {
-            foreach (var card in _selectedCards) _model.Hand.Cards.Remove(card);
-            _selectedCards.Clear();
-            FillHand();
-        }
-
-        private void ResetGame()
-        {
-            _model.Deck.Reset();
-            _model.Deck.Shuffle();
-            _model.Hand.Cards.Clear();
-            _selectedCards.Clear();
-            _totalScore = 0;
-            FillHand();
-        }
-
-        private void FillHand()
-        {
-            while (CurrentHand.Count < _model.Hand.MaxCards)
-            {
-                var c = _model.Deck.TakeCard();
-                if (c == null) break;
-                _model.Hand.AddCard(c);
-            }
         }
     }
 }
