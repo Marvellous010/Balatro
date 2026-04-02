@@ -17,9 +17,22 @@ namespace Balatro1
         public virtual int CalculateBonus(IEnumerable<Card> hand) => 0;
         public virtual double CalculateMultiplier(IEnumerable<Card> hand) => 1.0;
 
-        public override string ToString()
+        public string GetTypePrefix()
         {
-            string suitSymbol = Suit switch
+            return this.GetType().Name switch
+            {
+                "BonusCard" => "[B] ",
+                "ExtraCard" => "[E] ",
+                "GlassCard" => "[G] ",
+                "WildCard" => "[W] ",
+                "SteelCard" => "[S] ",
+                _ => ""
+            };
+        }
+
+        public string GetSuitSymbol()
+        {
+            return Suit switch
             {
                 Suit.Hearts => "♥",
                 Suit.Diamonds => "♦",
@@ -27,8 +40,11 @@ namespace Balatro1
                 Suit.Spades => "♠",
                 _ => Suit.ToString()
             };
+        }
 
-            string valStr = Value switch
+        public string GetValueString()
+        {
+            return Value switch
             {
                 CardValue.Two => "2",
                 CardValue.Three => "3",
@@ -41,18 +57,11 @@ namespace Balatro1
                 CardValue.Ten => "10",
                 _ => Value.ToString()
             };
+        }
 
-            string type = this.GetType().Name switch
-            {
-                "BonusCard" => " (B)",
-                "ExtraCard" => " (E)",
-                "GlassCard" => " (G)",
-                "WildCard" => " (W)",
-                "SteelCard" => " (S)",
-                _ => ""
-            };
-
-            return $"{valStr}{suitSymbol}{type}";
+        public override string ToString()
+        {
+            return $"{GetTypePrefix()}{GetValueString()}{GetSuitSymbol()}";
         }
     }
 }

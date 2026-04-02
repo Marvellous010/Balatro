@@ -81,9 +81,9 @@ namespace Balatro1
             ConsoleColor suitColor = card.Suit switch
             {
                 Suit.Hearts => ConsoleColor.Red,
-                Suit.Diamonds => ConsoleColor.Black,
+                
                 Suit.Spades => ConsoleColor.Red,
-                Suit.Clubs => ConsoleColor.Black,
+               
                 _ => ConsoleColor.White
             };
 

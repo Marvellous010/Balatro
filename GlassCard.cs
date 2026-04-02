@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Balatro1
 {
     public class GlassCard : Card
-    {
+    { //static functie met chatgpt hulp
         private static readonly Random _random = new();
 
         public GlassCard(Suit suit, CardValue value) : base(suit, value) { }
