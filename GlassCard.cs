@@ -12,6 +12,6 @@ namespace Balatro1
         public override int CalculateBonus(IEnumerable<Card> hand) => 0;
         public override double CalculateMultiplier(IEnumerable<Card> hand) => 2.0;
 
-        public bool ShouldBreak() => _random.Next(1, 5) == 1;
+        public bool ShouldBreak() => _random.Next(1,5) == 1;
     }
 }

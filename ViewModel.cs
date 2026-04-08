@@ -21,7 +21,7 @@ namespace Balatro1
                 Console.Clear();
                 Console.WriteLine("Balatro C# Spel");
                 Console.WriteLine($"Score: {_engine.TotalScore}");
-                Console.WriteLine($"Deck: {_engine.RemainingCards} | Hand: {_engine.CurrentHand.Count}");
+                Console.WriteLine($"Deck: {_engine.RemainingCards} Kaarten over");
                 Console.WriteLine("-----------------------------------");
 
                 for (int i = 0; i < _engine.CurrentHand.Count; i++)

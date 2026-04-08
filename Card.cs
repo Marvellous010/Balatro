@@ -26,6 +26,7 @@ namespace Balatro1
                 "GlassCard" => "[G] ",
                 "WildCard" => "[W] ",
                 "SteelCard" => "[S] ",
+                "StickerDecorator" => "[★] ",
                 _ => ""
             };
         }
